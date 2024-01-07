@@ -1,3 +1,6 @@
+package Entity;
+
+import java.util.List;
 import java.util.Objects;
 
 public class Route {
@@ -5,9 +8,9 @@ public class Route {
     private double distance;
     private int popularity;
     private boolean isFavorite;
-    private TwoLinkedList<String> locationPoints;
+    private List<String> locationPoints;
 
-    public Route(String id, double distance, int popularity, boolean isFavorite, TwoLinkedList<String> locationPoints) {
+    public Route(String id, double distance, int popularity, boolean isFavorite, List<String> locationPoints) {
         this.id = id;
         this.distance = distance;
         this.popularity = popularity;
@@ -31,25 +34,8 @@ public class Route {
         return isFavorite;
     }
 
-    public TwoLinkedList<String> getLocationPoints() {
+    public List<String> getLocationPoints() {
         return locationPoints;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Route route = (Route) o;
-        return Double.compare(route.distance, distance) == 0 &&
-                popularity == route.popularity &&
-                isFavorite == route.isFavorite &&
-                Objects.equals(id, route.id) &&
-                Objects.equals(locationPoints, route.locationPoints);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(distance, locationPoints.get(0), locationPoints.get(locationPoints.size() - 1));
     }
 
     @Override
@@ -62,4 +48,25 @@ public class Route {
                 ", locationPoints=" + locationPoints.toString() +
                 '}';
     }
+
+    public void increasePopularity() {
+        this.popularity++;
+    }
+
+    public boolean hasLogicalOrder(String startPoint, String endPoint) {
+        int startIndex = locationPoints.indexOf(startPoint);
+        int endIndex = locationPoints.indexOf(endPoint);
+
+        return startIndex >= 0 && endIndex >= 0 && startIndex <= endIndex;
+    }
+
+    public boolean equals(Route otherRoute) {
+        return this.hashCode() == otherRoute.hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(distance, locationPoints.get(0), locationPoints.get(locationPoints.size() - 1));
+    }
+
 }

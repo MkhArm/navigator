@@ -1,12 +1,14 @@
+package DataStructure;
+
 import java.util.Objects;
 
 public class KeyValue<Key, Value> {
 
     private Key key;
-    private TwoLinkedList<Value> values;
+    private MyLinkedList<Value> values;
 
     // Конструктор класса
-    public KeyValue(Key key, TwoLinkedList<Value> values) {
+    public KeyValue(Key key, MyLinkedList<Value> values) {
         this.setKey(key);
         this.setValues(values);
     }
@@ -22,12 +24,12 @@ public class KeyValue<Key, Value> {
     }
 
     // Геттер для списка значений
-    public TwoLinkedList<Value> getValues() {
+    public MyLinkedList<Value> getValues() {
         return this.values;
     }
 
     // Сеттер для списка значений
-    public void setValues(TwoLinkedList<Value> values) {
+    public void setValues(MyLinkedList<Value> values) {
         this.values = values;
     }
 
@@ -44,6 +46,6 @@ public class KeyValue<Key, Value> {
     // Метод для представления объекта в виде строки
     @Override
     public String toString() {
-        return String.format("%s -> %s", this.getKey(), this.getValues().toString());
+        return String.format("Key: %s -> Value: %s", this.getKey(), this.getValues().toString());
     }
 }

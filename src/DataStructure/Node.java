@@ -1,4 +1,6 @@
-class Node<T> {
+package DataStructure;
+
+public class Node<T> {
     private T data;
     private Node<T> prev;
     private Node<T> next;
@@ -25,5 +27,9 @@ class Node<T> {
 
     public void setNext(Node<T> next) {
         this.next = next;
+    }
+
+    public void setData(T data) {
+        this.data = data;
     }
 }
