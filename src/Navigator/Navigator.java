@@ -1,13 +1,12 @@
 package Navigator;
 
+import DataStructure.TwoLinkedList;
 import Entity.Route;
 
 import java.util.List;
 
 public interface Navigator {
     void addRoute(Route route);
-
-    List<Route> getRoutes();
 
     void removeRoute(String routeId);
 
@@ -24,4 +23,6 @@ public interface Navigator {
     Iterable<Route> getFavoriteRoutes(String destinationPoint);
 
     Iterable<Route> getTop3Routes();
+
+    Iterable<Route> getAllRoutes();
 }

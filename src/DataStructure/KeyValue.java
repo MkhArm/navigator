@@ -5,10 +5,10 @@ import java.util.Objects;
 public class KeyValue<Key, Value> {
 
     private Key key;
-    private MyLinkedList<Value> values;
+    private TwoLinkedList<Value> values;
 
     // Конструктор класса
-    public KeyValue(Key key, MyLinkedList<Value> values) {
+    public KeyValue(Key key, TwoLinkedList<Value> values) {
         this.setKey(key);
         this.setValues(values);
     }
@@ -24,12 +24,12 @@ public class KeyValue<Key, Value> {
     }
 
     // Геттер для списка значений
-    public MyLinkedList<Value> getValues() {
+    public TwoLinkedList<Value> getValues() {
         return this.values;
     }
 
     // Сеттер для списка значений
-    public void setValues(MyLinkedList<Value> values) {
+    public void setValues(TwoLinkedList<Value> values) {
         this.values = values;
     }
 

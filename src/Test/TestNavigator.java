@@ -1,12 +1,10 @@
 package Test;
 
+import DataStructure.TwoLinkedList;
 import Entity.Route;
 import Navigator.Navigator;
 import Navigator.NavigatorImpl;
-
-import java.util.Arrays;
 import java.util.InputMismatchException;
-import java.util.List;
 import java.util.Scanner;
 
 public class TestNavigator {
@@ -81,10 +79,10 @@ public class TestNavigator {
         scanner.nextLine(); // Считать символ новой строки
 
         System.out.println("Введите точки маршрута (по одной на строке):");
-        java.util.List<String> locationPoints = new java.util.ArrayList<>();
+        TwoLinkedList<String> locationPoints = new TwoLinkedList<>();
         for (int i = 0; i < numPoints; i++) {
             String point = scanner.nextLine();
-            locationPoints.add(point);
+            locationPoints.addLast(point);
         }
 
         Route route = new Route(id, distance, popularity, isFavorite, locationPoints);
@@ -118,7 +116,7 @@ public class TestNavigator {
 
     private static void printAllRoutes(Navigator navigator) {
         System.out.println("Все маршруты:");
-        for (Route route : navigator.getRoutes()) {
+        for (Route route : navigator.getAllRoutes()) {
             System.out.println(route);
         }
     }
@@ -170,38 +168,54 @@ public class TestNavigator {
     }
 
     private static void addDefaultRoutes(Navigator navigator) {
-        List<String> points1 = Arrays.asList("A", "B", "C", "F", "G", "D");
+        TwoLinkedList<String> points1 = new TwoLinkedList<>();
+        points1.addAll("A", "B", "C", "F", "G", "D");
         Route route1 = new Route("1", 50.0, 100, false, points1);
 
-        List<String> points2 = Arrays.asList("A", "Y", "D");
-        Route route2 = new Route("2", 30.0, 75, false, points2);
+        TwoLinkedList<String> points2 = new TwoLinkedList<>();
+        points2.addAll("A", "Y", "D");
+        Route route2 = new Route("2", 30.0, 75, true, points2);
 
-        List<String> points3 = Arrays.asList("A", "Q", "R", "S", "D");
-        Route route3 = new Route("3", 80.0, 110, true, points3);
+        TwoLinkedList<String> points3 = new TwoLinkedList<>();
+        points3.addAll("A", "Q", "R", "S", "D");
+        Route route3 = new Route("3", 80.0, 115, true, points3);
 
-        List<String> points4 = Arrays.asList("A", "N", "D");
-        Route route4 = new Route("4", 20.0, 90, false, points4);
+        TwoLinkedList<String> points4 = new TwoLinkedList<>();
+        points4.addAll("A", "N", "D");
+        Route route4 = new Route("4", 20.0, 90, true, points4);
 
-        List<String> points5 = Arrays.asList("E", "F", "G", "H", "I");
-        Route route5 = new Route("5", 60.0, 110, true, points5);
+        TwoLinkedList<String> points5 = new TwoLinkedList<>();
+        points5.addAll("E", "F", "G", "D", "I");
+        Route route5 = new Route("5", 80.0, 110, true, points5);
 
-        List<String> points6 = Arrays.asList("A", "S", "D");
+        TwoLinkedList<String> points6 = new TwoLinkedList<>();
+        points6.addAll("A", "S", "D");
         Route route6 = new Route("6", 20.0, 95, false, points6);
 
-        List<String> points7 = Arrays.asList("J", "K", "L");
+        TwoLinkedList<String> points7 = new TwoLinkedList<>();
+        points7.addAll("J", "K", "L");
         Route route7 = new Route("7", 45.0, 95, true, points7);
 
-        List<String> points8 = Arrays.asList("AA", "BB", "CC");
+        TwoLinkedList<String> points8 = new TwoLinkedList<>();
+        points8.addAll("AA", "BB", "CC");
         Route route8 = new Route("8", 25.0, 70, false, points8);
 
-        List<String> points9 = Arrays.asList("DD", "EE", "FF", "GG");
+        TwoLinkedList<String> points9 = new TwoLinkedList<>();
+        points9.addAll("DD", "EE", "FF", "GG");
         Route route9 = new Route("9", 70.0, 130, true, points9);
 
-        List<String> points10 = Arrays.asList("HH", "II", "JJ", "KK");
+        TwoLinkedList<String> points10 = new TwoLinkedList<>();
+        points10.addAll("HH", "II", "JJ", "KK");
         Route route10 = new Route("10", 55.0, 105, false, points10);
 
-        List<String> points11 = Arrays.asList("A", "B", "C", "F", "G", "D");
+        TwoLinkedList<String> points11 = new TwoLinkedList<>();
+        points11.addAll("A", "B", "C", "F", "G", "D");
         Route route11 = new Route("11", 50.0, 100, true, points11);
+
+        TwoLinkedList<String> points12 = new TwoLinkedList<>();
+        points12.addAll("A", "D", "F");
+        Route route12 = new Route("12", 45.0, 45, true, points12);
+
 
         navigator.addRoute(route1);
         navigator.addRoute(route2);
@@ -214,5 +228,8 @@ public class TestNavigator {
         navigator.addRoute(route9);
         navigator.addRoute(route10);
         navigator.addRoute(route11);
+        navigator.addRoute(route12);
+        System.out.println(navigator);
+
     }
 }

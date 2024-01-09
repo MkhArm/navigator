@@ -1,6 +1,7 @@
 package Entity;
 
-import java.util.List;
+import DataStructure.TwoLinkedList;
+
 import java.util.Objects;
 
 public class Route {
@@ -8,9 +9,9 @@ public class Route {
     private double distance;
     private int popularity;
     private boolean isFavorite;
-    private List<String> locationPoints;
+    private TwoLinkedList<String> locationPoints;
 
-    public Route(String id, double distance, int popularity, boolean isFavorite, List<String> locationPoints) {
+    public Route(String id, double distance, int popularity, boolean isFavorite, TwoLinkedList<String> locationPoints) {
         this.id = id;
         this.distance = distance;
         this.popularity = popularity;
@@ -34,7 +35,7 @@ public class Route {
         return isFavorite;
     }
 
-    public List<String> getLocationPoints() {
+    public TwoLinkedList<String> getLocationPoints() {
         return locationPoints;
     }
 
@@ -60,8 +61,14 @@ public class Route {
         return startIndex >= 0 && endIndex >= 0 && startIndex <= endIndex;
     }
 
-    public boolean equals(Route otherRoute) {
-        return this.hashCode() == otherRoute.hashCode();
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Route otherRoute = (Route) obj;
+        return Objects.equals(distance, otherRoute.distance) &&
+                Objects.equals(locationPoints.get(0), otherRoute.locationPoints.get(0)) &&
+                Objects.equals(locationPoints.get(locationPoints.size() - 1), otherRoute.locationPoints.get(otherRoute.locationPoints.size() - 1));
     }
 
     @Override

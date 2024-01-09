@@ -29,8 +29,8 @@ public class TestMultiMap {
         for (int i = 0; i < 16; i++) {
             multiMap.add("Ключ" + i, "Значение" + i);
         }
-        System.out.println("    Новый размер после добавления 16 элементов: " + multiMap.size());
-        System.out.println("    Новая ёмкость после добавления 16 элементов: " + multiMap.capacity());
+        System.out.println("Новый размер после добавления 16 элементов: " + multiMap.size());
+        System.out.println("Новая ёмкость после добавления 16 элементов: " + multiMap.capacity());
 
         // 6. Тест метода получения размера хэш-таблицы
         System.out.println("6. Размер: " + multiMap.size());
@@ -39,7 +39,7 @@ public class TestMultiMap {
         System.out.println("7. Ёмкость: " + multiMap.capacity());
 
         // 8. Тест метода получения списка значений по ключу
-        System.out.println("8. Получение значений для 'Ключ1': " + multiMap.get("Ключ1"));
+        System.out.println("8. Получение значений для 'Ключ1': " + multiMap.getValues("Ключ1"));
 
         // 9. Тест метода toString для представления хэш-таблицы в виде строки
         System.out.println("9. Вывод toString: " + multiMap);

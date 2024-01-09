@@ -2,11 +2,9 @@ package Navigator;
 
 import DataStructure.KeyValue;
 import DataStructure.MultiMap;
-import DataStructure.MyLinkedList;
+import DataStructure.TwoLinkedList;
 import Entity.Route;
-
 import java.util.Comparator;
-import java.util.List;
 
 public class NavigatorImpl implements Navigator {
     private MultiMap<String, Route> routeMap;
@@ -15,26 +13,22 @@ public class NavigatorImpl implements Navigator {
         this.routeMap = new MultiMap<>();
     }
 
-    @Override
     public void addRoute(Route route) {
+        String key = getKey(route);
+        System.out.println("Key for route " + route.getId() + ": " + key); // Добавьте эту строку
         if (contains(route)) {
             System.out.println("Маршрут уже существует");
             return;
         }
-        String key = getKey(route);
         routeMap.add(key, route);
         System.out.println("Маршрут успешно добавлен.");
     }
 
-    @Override
-    public List<Route> getRoutes() {
-        return routeMap.getValues();
-    }
 
     @Override
     public void removeRoute(String routeId) {
         for (KeyValue<String, Route> keyValue : routeMap) {
-            MyLinkedList<Route> routes = keyValue.getValues();
+            TwoLinkedList<Route> routes = keyValue.getValues();
             for (Route route : routes) {
                 if (route.getId().equals(routeId)) {
                     routes.remove(route);
@@ -49,7 +43,7 @@ public class NavigatorImpl implements Navigator {
     @Override
     public boolean contains(Route route) {
         String key = getKey(route);
-        MyLinkedList<Route> routes = routeMap.get(key);
+        TwoLinkedList<Route> routes = routeMap.getValues(key);
         return routes != null;
     }
 
@@ -65,7 +59,7 @@ public class NavigatorImpl implements Navigator {
     @Override
     public Route getRoute(String routeId) {
         for (KeyValue<String, Route> keyValue : routeMap) {
-            MyLinkedList<Route> routes = keyValue.getValues();
+            TwoLinkedList<Route> routes = keyValue.getValues();
             for (Route route : routes) {
                 if (route.getId().equals(routeId)) {
                     return route;
@@ -86,18 +80,83 @@ public class NavigatorImpl implements Navigator {
 
     @Override
     public Iterable<Route> searchRoutes(String startPoint, String endPoint) {
-        MyLinkedList<Route> result = new MyLinkedList<>();
+        TwoLinkedList<Route> result = new TwoLinkedList<>();
         for (KeyValue<String, Route> keyValue : routeMap) {
-            MyLinkedList<Route> routes = keyValue.getValues();
+            TwoLinkedList<Route> routes = keyValue.getValues();
             for (Route route : routes) {
                 if (route.hasLogicalOrder(startPoint, endPoint)) {
-                    result.add(route);
+                    result.addLast(route);
                 }
             }
         }
 
         result.sort(new SearchRouteComparator());
         return result;
+    }
+
+    @Override
+    public Iterable<Route> getFavoriteRoutes(String destinationPoint) {
+        TwoLinkedList<Route> result = new TwoLinkedList<>();
+        for (KeyValue<String, Route> keyValue : routeMap) {
+            TwoLinkedList<Route> routes = keyValue.getValues();
+            for (Route route : routes) {
+                if (route.isFavorite() && route.getLocationPoints().contains(destinationPoint) && !route.getLocationPoints().get(0).contains(destinationPoint)) {
+                    result.addLast(route);
+                }
+            }
+        }
+
+        result.sort(new FavoriteRouteComparator());
+        return result;
+    }
+
+
+    @Override
+    public Iterable<Route> getTop3Routes() {
+        TwoLinkedList<Route> allRoutes = new TwoLinkedList<>();
+        for (KeyValue<String, Route> keyValue : routeMap) {
+            allRoutes.addAll(keyValue.getValues());
+        }
+
+        allRoutes.sort(new Top3RouteComparator());
+        return allRoutes.subList(0, Math.min(allRoutes.size(), 3));
+    }
+
+    private static class FavoriteRouteComparator implements Comparator<Route> {
+        @Override
+        public int compare(Route route1, Route route2) {
+            int distanceComparison = Double.compare(route1.getDistance(), route2.getDistance());
+            if (distanceComparison != 0) {
+                return distanceComparison;
+            }
+
+            return Integer.compare(route2.getPopularity(), route1.getPopularity());
+        }
+    }
+    @Override
+    public Iterable<Route> getAllRoutes() {
+        TwoLinkedList<Route> allRoutes = new TwoLinkedList<>();
+        for (KeyValue<String, Route> keyValue : routeMap) {
+            allRoutes.addAll(keyValue.getValues());
+        }
+        return allRoutes;
+    }
+
+    private static class Top3RouteComparator implements Comparator<Route> {
+        @Override
+        public int compare(Route route1, Route route2) {
+            int popularityDiff = route2.getPopularity() - route1.getPopularity();
+            if (popularityDiff != 0) {
+                return popularityDiff;
+            }
+
+            double distanceDiff = route1.getDistance() - route2.getDistance();
+            if (distanceDiff != 0) {
+                return Double.compare(distanceDiff, 0.0);
+            }
+
+            return Integer.compare(route1.getLocationPoints().size(), route2.getLocationPoints().size());
+        }
     }
 
     private static class SearchRouteComparator implements Comparator<Route> {
@@ -121,67 +180,17 @@ public class NavigatorImpl implements Navigator {
         }
     }
 
-    @Override
-    public Iterable<Route> getFavoriteRoutes(String destinationPoint) {
-        MyLinkedList<Route> result = new MyLinkedList<>();
-        for (KeyValue<String, Route> keyValue : routeMap) {
-            MyLinkedList<Route> routes = keyValue.getValues();
-            for (Route route : routes) {
-                if (route.isFavorite() && route.getLocationPoints().indexOf(destinationPoint) > 0) {
-                    result.add(route);
-                }
-            }
-        }
-
-        result.sort(new FavoriteRouteComparator());
-        return result;
-    }
-
-    private static class FavoriteRouteComparator implements Comparator<Route> {
-        @Override
-        public int compare(Route route1, Route route2) {
-            int distanceComparison = Double.compare(route1.getDistance(), route2.getDistance());
-            if (distanceComparison != 0) {
-                return distanceComparison;
-            }
-
-            return Integer.compare(route2.getPopularity(), route1.getPopularity());
-        }
-    }
-
-    @Override
-    public Iterable<Route> getTop3Routes() {
-        MyLinkedList<Route> allRoutes = new MyLinkedList<>();
-        for (KeyValue<String, Route> keyValue : routeMap) {
-            allRoutes.addAll(keyValue.getValues());
-        }
-
-        allRoutes.sort(new Top3RouteComparator());
-        return allRoutes.subList(0, Math.min(allRoutes.size(), 3));
-    }
-
-    private static class Top3RouteComparator implements Comparator<Route> {
-        @Override
-        public int compare(Route route1, Route route2) {
-            int popularityDiff = route2.getPopularity() - route1.getPopularity();
-            if (popularityDiff != 0) {
-                return popularityDiff;
-            }
-
-            double distanceDiff = route1.getDistance() - route2.getDistance();
-            if (distanceDiff != 0) {
-                return Double.compare(distanceDiff, 0.0);
-            }
-
-            return Integer.compare(route1.getLocationPoints().size(), route2.getLocationPoints().size());
-        }
-    }
-
-    // Дополнительный метод для формирования ключа из начальной точки, конечной точки и длины
     private String getKey(Route route) {
         String startPoint = route.getLocationPoints().get(0);
         String endPoint = route.getLocationPoints().get(route.getLocationPoints().size() - 1);
         double distance = route.getDistance();
         return startPoint + "-" + endPoint + "-" + distance;
+    }
+
+    @Override
+    public String toString() {
+        return "NavigatorImpl{" +
+                "routeMap=" + routeMap +
+                '}';
     }
 }

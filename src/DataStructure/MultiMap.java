@@ -1,7 +1,6 @@
 package DataStructure;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 public class MultiMap<K, V> implements Iterable<KeyValue<K, V>> {
@@ -9,13 +8,13 @@ public class MultiMap<K, V> implements Iterable<KeyValue<K, V>> {
     private int collisions; // Счетчик коллизий
     private static final int INITIAL_CAPACITY = 16;
     private static final double LOAD_FACTOR = 0.80d;
-    public List<KeyValue<K, V>>[] slots; // Массив списков, представляющих слоты хэш-таблицы
+    public TwoLinkedList<KeyValue<K, V>>[] slots; // Массив списков, представляющих слоты хэш-таблицы
     private int count; // Количество элементов в хэш-таблице
     private int capacity; // Общая ёмкость хэш-таблицы
 
     // Конструктор по умолчанию
     public MultiMap() {
-        this.slots = new List[INITIAL_CAPACITY];
+        this.slots = new TwoLinkedList[INITIAL_CAPACITY];
         this.capacity = INITIAL_CAPACITY;
     }
 
@@ -24,7 +23,7 @@ public class MultiMap<K, V> implements Iterable<KeyValue<K, V>> {
         if (capacity <= 0) {
             throw new IllegalArgumentException("Capacity must be a positive integer");
         }
-        this.slots = new MyLinkedList[capacity];
+        this.slots = new TwoLinkedList[capacity];
         this.capacity = capacity;
     }
 
@@ -32,30 +31,26 @@ public class MultiMap<K, V> implements Iterable<KeyValue<K, V>> {
     // Добавление значения по хэшу ключа
     public void add(K key, V value) {
         int slotNumber = findSlotNumber(key);
-
         if (slots[slotNumber] == null) {
-            slots[slotNumber] = new MyLinkedList<>();
-        } else {
-            collisions++;
+            slots[slotNumber] = new TwoLinkedList<>();
         }
 
-        boolean keyExists = false;
-        for (KeyValue<K, V> keyValue : slots[slotNumber]) {
+        Iterator<KeyValue<K, V>> iterator = slots[slotNumber].iterator();
+        while (iterator.hasNext()) {
+            KeyValue<K, V> keyValue = iterator.next();
             if (keyValue.getKey().equals(key)) {
-                keyValue.getValues().add(value);
-                keyExists = true;
-                break;
+                keyValue.getValues().addLast(value);
+                return;
             }
         }
 
-        if (!keyExists) {
-            KeyValue<K, V> newKeyValue = new KeyValue<>(key, new MyLinkedList<>());
-            newKeyValue.getValues().add(value);
-            slots[slotNumber].add(newKeyValue);
-            count++;
-            growIfNeeded();
-        }
+        KeyValue<K, V> newKeyValue = new KeyValue<>(key, new TwoLinkedList<>());
+        newKeyValue.getValues().addLast(value);
+        slots[slotNumber].addLast(newKeyValue);
+        count++;
+        growIfNeeded();
     }
+
 
     // Получение количества коллизий
     public int getCollisions() {
@@ -76,24 +71,26 @@ public class MultiMap<K, V> implements Iterable<KeyValue<K, V>> {
 
     // Увеличение ёмкости хэш-таблицы
     private void grow() {
-        int newCapacity = this.capacity * 2;
-        List<KeyValue<K, V>>[] newSlots = new MyLinkedList[newCapacity];
-
-        for (List<KeyValue<K, V>> slot : slots) {
-            if (slot != null) {
-                for (KeyValue<K, V> keyValue : slot) {
+        int newCapacity = capacity * 2; // Увеличиваем ёмкость вдвое
+        TwoLinkedList<KeyValue<K, V>>[] newSlots = new TwoLinkedList[newCapacity];
+        for (TwoLinkedList<KeyValue<K, V>> slotList : slots) {
+            if (slotList != null) {
+                Iterator<KeyValue<K, V>> iterator = slotList.iterator();
+                while (iterator.hasNext()) {
+                    KeyValue<K, V> keyValue = iterator.next();
                     int newSlotNumber = Math.abs(keyValue.getKey().hashCode()) % newCapacity;
                     if (newSlots[newSlotNumber] == null) {
-                        newSlots[newSlotNumber] = new MyLinkedList<>();
+                        newSlots[newSlotNumber] = new TwoLinkedList<>();
                     }
-                    newSlots[newSlotNumber].add(keyValue);
+                    newSlots[newSlotNumber].addLast(keyValue);
                 }
             }
         }
 
-        this.slots = newSlots;
-        this.capacity = newCapacity;
+        slots = newSlots; // Обновляем ссылку на массив слотов
+        capacity = newCapacity; // Обновляем ёмкость
     }
+
 
     // Получение размера хэш-таблицы
     public int size() {
@@ -106,18 +103,34 @@ public class MultiMap<K, V> implements Iterable<KeyValue<K, V>> {
     }
 
     // Получение списка значений по ключу
-    public MyLinkedList<V> get(K key) {
-        int slotNumber = findSlotNumber(key);
+    public TwoLinkedList<K> getKeys() {
+        TwoLinkedList<K> keysList = new TwoLinkedList<>();
+        for (TwoLinkedList<KeyValue<K, V>> slotList : slots) {
+            if (slotList != null) {
+                Iterator<KeyValue<K, V>> iterator = slotList.iterator();
+                while (iterator.hasNext()) {
+                    KeyValue<K, V> keyValue = iterator.next();
+                    keysList.addLast(keyValue.getKey());
+                }
+            }
+        }
+        return keysList;
+    }
 
-        if (slots[slotNumber] != null) {
-            for (KeyValue<K, V> keyValue : slots[slotNumber]) {
-                if (keyValue.getKey().equals(key)) {
-                    return keyValue.getValues();
+    public TwoLinkedList<V> getAllValues() {
+        TwoLinkedList<V> allValues = new TwoLinkedList<>();
+
+        for (TwoLinkedList<KeyValue<K, V>> slotList : slots) {
+            if (slotList != null) {
+                Iterator<KeyValue<K, V>> iterator = slotList.iterator();
+                while (iterator.hasNext()) {
+                    KeyValue<K, V> keyValue = iterator.next();
+                    allValues.addAll(keyValue.getValues());
                 }
             }
         }
 
-        return null;
+        return allValues;
     }
 
     // Итератор для перебора элементов хэш-таблицы
@@ -173,25 +186,37 @@ public class MultiMap<K, V> implements Iterable<KeyValue<K, V>> {
     }
 
     public void remove(K key) {
-        int slotNumber = findSlotNumber(key);
+        int slotNumber = findSlotNumber(key); // Находим номер слота для ключа
         if (slots[slotNumber] != null) {
-            for (KeyValue<K, V> keyValue : slots[slotNumber]) {
+            Iterator<KeyValue<K, V>> iterator = slots[slotNumber].iterator();
+            while (iterator.hasNext()) {
+                KeyValue<K, V> keyValue = iterator.next();
                 if (keyValue.getKey().equals(key)) {
-                    slots[slotNumber].remove(keyValue);
-                    count--;
+                    iterator.remove(); // Удаляем элемент из списка слота
+                    count--; // Уменьшаем количество элементов в хэш-таблице
                     return;
                 }
             }
         }
     }
 
-    public List<V> getValues() {
-        List<V> values = new MyLinkedList<>();
-        for (KeyValue<K, V> keyValue : this) {
-            values.addAll(keyValue.getValues());
+    public TwoLinkedList<V> getValues(K key) {
+        int slotNumber = findSlotNumber(key);
+        if (slots[slotNumber] != null) {
+            Iterator<KeyValue<K, V>> iterator = slots[slotNumber].iterator();
+            while (iterator.hasNext()) {
+                KeyValue<K, V> keyValue = iterator.next();
+                if (keyValue.getKey().equals(key)) {
+                    return keyValue.getValues(); // Возвращаем список значений по ключу
+                }
+            }
+            return null;
         }
-        return values;
+        // Если ключ не найден, возвращаем null
+        return null;
     }
+
+
 
     @Override
     public String toString() {
@@ -199,7 +224,7 @@ public class MultiMap<K, V> implements Iterable<KeyValue<K, V>> {
 
         for (int i = 0; i < capacity; i++) {
             if (slots[i] != null) {
-                result.append("  Slot ").append(i).append(": ").append(slots[i]).append("\n");
+                result.append("  Slot ").append(i).append(": ").append(slots[i].toString()).append("\n");
             }
         }
 
