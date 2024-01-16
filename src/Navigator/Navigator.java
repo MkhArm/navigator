@@ -1,9 +1,5 @@
 package Navigator;
-
-import DataStructure.TwoLinkedList;
 import Entity.Route;
-
-import java.util.List;
 
 public interface Navigator {
     void addRoute(Route route);

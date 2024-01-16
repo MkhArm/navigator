@@ -1,7 +1,6 @@
 package Entity;
 
 import DataStructure.TwoLinkedList;
-
 import java.util.Objects;
 
 public class Route {
@@ -58,7 +57,7 @@ public class Route {
         int startIndex = locationPoints.indexOf(startPoint);
         int endIndex = locationPoints.indexOf(endPoint);
 
-        return startIndex >= 0 && endIndex >= 0 && startIndex <= endIndex;
+        return startIndex == 0 && endIndex == locationPoints.size() - 1;
     }
 
     @Override

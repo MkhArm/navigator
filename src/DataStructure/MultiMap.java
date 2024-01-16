@@ -30,27 +30,44 @@ public class MultiMap<K, V> implements Iterable<KeyValue<K, V>> {
     // Добавление элемента в хэш-таблицу
     // Добавление значения по хэшу ключа
     public void add(K key, V value) {
-        int slotNumber = findSlotNumber(key);
+        int initialSlot = findSlotNumber(key);
+        int slotNumber = initialSlot;
+
+        // Ищем первый свободный слот или слот с существующим ключом
+        while (slots[slotNumber] != null) {
+            Iterator<KeyValue<K, V>> iterator = slots[slotNumber].iterator();
+            while (iterator.hasNext()) {
+                KeyValue<K, V> keyValue = iterator.next();
+                if (keyValue.getKey().equals(key)) {
+                    // Ключ уже существует, добавляем значение в существующий элемент
+                    keyValue.getValues().addLast(value);
+                    return;
+                }
+            }
+
+            // Слот занят, ищем следующий
+            slotNumber = (slotNumber + 1) % capacity;
+
+            // Если вернулись на исходный слот, значит, все слоты заняты, и нужно увеличить хэш-таблицу
+            if (slotNumber == initialSlot) {
+                grow();
+                // После увеличения, нужно пересчитать номер слота
+                slotNumber = findSlotNumber(key);
+            }
+        }
+
+        // Если дошли сюда, значит, нашли свободный слот
         if (slots[slotNumber] == null) {
             slots[slotNumber] = new TwoLinkedList<>();
         }
 
-        Iterator<KeyValue<K, V>> iterator = slots[slotNumber].iterator();
-        while (iterator.hasNext()) {
-            KeyValue<K, V> keyValue = iterator.next();
-            if (keyValue.getKey().equals(key)) {
-                keyValue.getValues().addLast(value);
-                return;
-            }
-        }
-
+        // Добавляем новый элемент в конец списка в найденном слоте
         KeyValue<K, V> newKeyValue = new KeyValue<>(key, new TwoLinkedList<>());
         newKeyValue.getValues().addLast(value);
         slots[slotNumber].addLast(newKeyValue);
         count++;
         growIfNeeded();
     }
-
 
     // Получение количества коллизий
     public int getCollisions() {
@@ -72,32 +89,29 @@ public class MultiMap<K, V> implements Iterable<KeyValue<K, V>> {
     // Увеличение ёмкости хэш-таблицы
     private void grow() {
         int newCapacity = capacity * 2; // Увеличиваем ёмкость вдвое
-        TwoLinkedList<KeyValue<K, V>>[] newSlots = new TwoLinkedList[newCapacity];
+        MultiMap<K, V> newMap = new MultiMap<>(newCapacity);
         for (TwoLinkedList<KeyValue<K, V>> slotList : slots) {
             if (slotList != null) {
                 Iterator<KeyValue<K, V>> iterator = slotList.iterator();
                 while (iterator.hasNext()) {
                     KeyValue<K, V> keyValue = iterator.next();
-                    int newSlotNumber = Math.abs(keyValue.getKey().hashCode()) % newCapacity;
-                    if (newSlots[newSlotNumber] == null) {
-                        newSlots[newSlotNumber] = new TwoLinkedList<>();
+                    TwoLinkedList<V> values = keyValue.getValues();
+                    for (V value : values) {
+                        newMap.add(keyValue.getKey(), value); // Добавляем каждое значение
                     }
-                    newSlots[newSlotNumber].addLast(keyValue);
                 }
             }
         }
-
-        slots = newSlots; // Обновляем ссылку на массив слотов
-        capacity = newCapacity; // Обновляем ёмкость
+        slots = newMap.slots; // Обновляем ссылку на массив слотов
+        capacity = newMap.capacity; // Обновляем ёмкость
     }
 
 
-    // Получение размера хэш-таблицы
     public int size() {
         return this.count;
     }
 
-    // Получение текущей ёмкости хэш-таблицы
+    // Получение текущей ёмкости
     public int capacity() {
         return this.capacity;
     }
@@ -129,7 +143,6 @@ public class MultiMap<K, V> implements Iterable<KeyValue<K, V>> {
                 }
             }
         }
-
         return allValues;
     }
 

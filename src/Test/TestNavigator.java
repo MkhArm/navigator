@@ -12,6 +12,18 @@ public class TestNavigator {
         Navigator navigator = new NavigatorImpl();
         Scanner scanner = new Scanner(System.in);
         addDefaultRoutes(navigator);
+        System.out.println("Contains route 1: " + navigator.contains(navigator.getRoute("1")));
+        System.out.println("Route with ID 1: " + navigator.getRoute("1"));
+        navigator.chooseRoute("1");
+        System.out.println("Routes from A to D:");
+        navigator.searchRoutes("A", "D").forEach(System.out::println);
+        System.out.println("Favorite routes with D:");
+        navigator.getFavoriteRoutes("D").forEach(System.out::println);
+        System.out.println("Top 3 routes:");
+        navigator.getTop3Routes().forEach(System.out::println);
+        System.out.println("Size after adding routes: " + navigator.size());
+        navigator.removeRoute("2");
+        System.out.println("Size after removing route 2: " + navigator.size());
         while (true) {
             System.out.println("1. Добавить маршрут");
             System.out.println("2. Удалить маршрут");
@@ -76,7 +88,7 @@ public class TestNavigator {
         System.out.print("Введите количество точек маршрута: ");
         int numPoints = scanner.nextInt();
 
-        scanner.nextLine(); // Считать символ новой строки
+        scanner.nextLine();
 
         System.out.println("Введите точки маршрута (по одной на строке):");
         TwoLinkedList<String> locationPoints = new TwoLinkedList<>();
